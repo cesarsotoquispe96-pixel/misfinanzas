@@ -4,16 +4,12 @@
 // ═══════════════════════════════════════════════════════
 
 const FIREBASE_CONFIG = {
-  apiKey:            "PEGA_AQUI_TU_apiKey",
-  authDomain:        "PEGA_AQUI_TU_authDomain",
-  projectId:         "PEGA_AQUI_TU_projectId",
-  storageBucket:     "PEGA_AQUI_TU_storageBucket",
-  messagingSenderId: "PEGA_AQUI_TU_messagingSenderId",
-  appId:             "PEGA_AQUI_TU_appId"
+  apiKey: "AIzaSyDgEinkvU6uMtxRDdu-rUIKPjzVgVRIS7M",
+  authDomain: "misfinanzas-568f6.firebaseapp.com",
+  projectId: "misfinanzas-568f6",
+  storageBucket: "misfinanzas-568f6.firebasestorage.app",
+  messagingSenderId: "248990760495",
+  appId: "1:248990760495:web:51b01684e9a50eda0050da"
 };
 
-// Tu identificador de usuario — cámbialo por tu nombre sin espacios
-// Esto asegura que tus datos sean privados aunque otros usen el mismo proyecto
-const USER_ID = "usuario_principal";
-
-export { FIREBASE_CONFIG, USER_ID };
+const USER_ID = "cesar";  // Cámbialo por tu nombre sin espacios;
