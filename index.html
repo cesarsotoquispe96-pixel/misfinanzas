@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b0e18">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MisFinanzas">
+<link rel="manifest" href="manifest.json">
+<title>MisFinanzas</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0b0e18;--bg2:#111520;--bg3:#171c2e;--card:#141928;--card2:#1c2236;
+  --bord:#22293d;--bord2:#2d3650;
+  --tx:#dce4f5;--mu:#6b7a9e;
+  --gr:#18d49e;--gr-a:rgba(24,212,158,.12);--gr-b:rgba(24,212,158,.3);
+  --re:#f06060;--re-a:rgba(240,96,96,.12);--re-b:rgba(240,96,96,.3);
+  --bl:#5ba4ff;--bl-a:rgba(91,164,255,.12);--bl-b:rgba(91,164,255,.3);
+  --ye:#f5c33a;--ye-a:rgba(245,195,58,.12);--ye-b:rgba(245,195,58,.3);
+  --pu:#b57dff;--pu-a:rgba(181,125,255,.12);
+  --pk:#f472b6;--pk-a:rgba(244,114,182,.12);--pk-b:rgba(244,114,182,.3);
+  --oh:#f59e0b;--oh-a:rgba(245,158,11,.15);
+  --ib:#3b82f6;--ib-a:rgba(59,130,246,.15);
+  --sg:#8b5cf6;--sg-a:rgba(139,92,246,.15);
+  --bv:#10b981;--bv-a:rgba(16,185,129,.15);
+  --r:10px;--rs:8px;--rl:14px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.top{background:var(--bg2);border-bottom:1px solid var(--bord);padding:0 12px;display:flex;align-items:center;height:50px;gap:10px;flex-shrink:0;position:relative;z-index:100}
+.logo{font-size:13px;font-weight:800;color:var(--gr);letter-spacing:-.5px;white-space:nowrap}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1}
+.tabs::-webkit-scrollbar{display:none}
+.tb{padding:5px 11px;border:none;background:transparent;color:var(--mu);font-size:12px;font-family:inherit;font-weight:600;cursor:pointer;border-radius:var(--rs);white-space:nowrap;transition:all .15s;border:1px solid transparent}
+.tb.on{background:var(--gr);color:#0b0e18}
+.tb:hover:not(.on){background:var(--bg3);color:var(--tx)}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .4s}
+.sdot.ok{background:var(--gr)}.sdot.err{background:var(--re)}.sdot.syn{background:var(--ye);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── CONTENT SCROLL ── */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(16px + var(--safe-bottom))}
+.wrap{padding:14px;max-width:680px;margin:0 auto}
+.sec{display:none}.sec.on{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--bord);border-radius:var(--rl);padding:15px;margin-bottom:11px}
+.csm{background:var(--card2);border:1px solid var(--bord);border-radius:var(--r);padding:12px}
+.ch{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:480px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}}
+
+/* ── METRICS ── */
+.mc{background:var(--card2);border:1px solid var(--bord);border-radius:var(--r);padding:11px 13px}
+.ml{font-size:10px;color:var(--mu);font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.mv{font-size:17px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-.5px}
+.mv.gr{color:var(--gr)}.mv.re{color:var(--re)}.mv.bl{color:var(--bl)}.mv.ye{color:var(--ye)}.mv.pu{color:var(--pu)}.mv.pk{color:var(--pk)}
+
+/* ── FORM ── */
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:10px;font-weight:700;color:var(--mu);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--bord);border-radius:var(--rs);padding:9px 11px;color:var(--tx);font-size:14px;font-family:inherit;transition:border .15s;outline:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gr)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7a9e'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+select option{background:#171c2e}
+textarea{resize:vertical;min-height:65px}
+input[type=file]{padding:6px;cursor:pointer;font-size:12px;background:transparent;border-style:dashed}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 16px;border-radius:var(--rs);border:1px solid var(--bord);background:transparent;color:var(--tx);font-size:13px;font-family:inherit;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.btn:active{transform:scale(.97)}
+.btn.gr{background:var(--gr);color:#0b0e18;border-color:var(--gr)}
+.btn.re{background:var(--re-a);color:var(--re);border-color:var(--re-b)}
+.btn.bl{background:var(--bl-a);color:var(--bl);border-color:var(--bl-b)}
+.btn.ye{background:var(--ye-a);color:var(--ye);border-color:var(--ye-b)}
+.btn.sm{padding:5px 11px;font-size:12px}
+.btn.full{width:100%;justify-content:center;margin-top:2px}
+.ico{background:none;border:none;color:var(--mu);cursor:pointer;padding:4px 6px;border-radius:5px;font-size:14px;line-height:1;transition:all .15s}
+.ico:hover,.ico:active{color:var(--re);background:var(--re-a)}
+.ico.ed{color:var(--bl)}.ico.ed:hover,.ico.ed:active{color:var(--bl);background:var(--bl-a)}
+
+/* ── BADGES ── */
+.b{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.boh{background:var(--oh-a);color:var(--oh)}.bib{background:var(--ib-a);color:var(--ib)}
+.bsg{background:var(--sg-a);color:var(--sg)}.bbv{background:var(--bv-a);color:var(--bv)}
+.bef{background:var(--bg3);color:var(--mu)}.byp{background:rgba(168,85,247,.15);color:#c084fc}
+.btr{background:var(--bl-a);color:var(--bl)}
+.byo{background:var(--gr-a);color:var(--gr)}.bmm{background:var(--pk-a);color:var(--pk)}
+.ban{background:var(--bl-a);color:var(--bl)}.bca{background:var(--ye-a);color:var(--ye)}
+.bha{background:rgba(99,102,241,.15);color:#818cf8}.bot{background:var(--pu-a);color:var(--pu)}
+.sp{background:var(--gr-a);color:var(--gr);border:1px solid var(--gr-b)}
+.ss{background:var(--ye-a);color:var(--ye);border:1px solid var(--ye-b)}
+.sn{background:var(--re-a);color:var(--re);border:1px solid var(--re-b)}
+
+/* ── ROWS ── */
+.row{display:flex;align-items:flex-start;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--bord);gap:9px}
+.row:last-child{border-bottom:none}
+.ri{flex:1;min-width:0}
+.rt{font-size:13px;font-weight:600;margin-bottom:2px;word-break:break-word}
+.rm{font-size:11px;color:var(--mu);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.ra{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap}
+.ra.gr{color:var(--gr)}.ra.re{color:var(--re)}.ra.ye{color:var(--ye)}
+.row-actions{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+
+/* ── PHOTO ── */
+.pt{width:46px;height:36px;object-fit:cover;border-radius:5px;border:1px solid var(--bord);cursor:pointer;flex-shrink:0}
+.pmfull{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:999;display:none;align-items:center;justify-content:center;cursor:pointer}
+.pmfull img{max-width:95vw;max-height:92vh;border-radius:var(--r)}
+.ipv{width:100%;max-height:150px;object-fit:cover;border-radius:var(--rs);border:1px solid var(--bord);margin-top:7px;display:none}
+
+/* ── PROGRESS ── */
+.pb{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:5px}
+.pf{height:100%;border-radius:3px;transition:width .5s}
+
+/* ── ALERTS ── */
+.al{padding:10px 13px;border-radius:var(--rs);font-size:12px;margin-bottom:10px;border:1px solid;line-height:1.6}
+.al.gr{background:var(--gr-a);color:var(--gr);border-color:var(--gr-b)}
+.al.re{background:var(--re-a);color:var(--re);border-color:var(--re-b)}
+.al.ye{background:var(--ye-a);color:var(--ye);border-color:var(--ye-b)}
+.al.bl{background:var(--bl-a);color:var(--bl);border-color:var(--bl-b)}
+
+/* ── DEBT CARDS ── */
+.dc{border:1px solid var(--bord);border-radius:var(--rl);margin-bottom:10px;overflow:hidden;background:var(--card)}
+.dc.ok{border-left:3px solid var(--gr)}.dc.pa{border-left:3px solid var(--ye)}.dc.pe{border-left:3px solid var(--re)}
+.dch{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--bord)}
+.dcb{padding:12px 14px}
+.payr{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--bord);gap:8px;font-size:12px}
+.payr:last-child{border-bottom:none}
+
+/* ── TARJETA CARDS ── */
+.tc{border:1px solid var(--bord);border-radius:var(--rl);padding:14px;position:relative;overflow:hidden;margin-bottom:10px;background:var(--card)}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.tc.oh::before{background:var(--oh)}.tc.ib::before{background:var(--ib)}
+.tc.sg::before{background:var(--sg)}.tc.bv::before{background:var(--bv)}
+
+/* ── TOGGLE ── */
+.tgh{cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;-webkit-user-select:none}
+.tga{font-size:10px;color:var(--mu);transition:transform .2s}
+.tga.on{transform:rotate(180deg)}
+.tgb{display:none;margin-top:10px}.tgb.on{display:block}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.modal-box{max-width:560px;margin:0 auto;background:var(--card);border:1px solid var(--bord);border-radius:var(--rl);padding:18px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal-title{font-weight:800;font-size:14px}
+
+/* ── MISC ── */
+.mnav{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.mnav select{flex:1;max-width:200px}
+.stit{font-size:15px;font-weight:800;margin-bottom:13px;display:flex;align-items:center;gap:7px}
+.empty{text-align:center;padding:28px 0;color:var(--mu);font-size:12px}
+.loading-row{text-align:center;padding:20px;color:var(--mu);font-size:12px;font-style:italic}
+.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.divider{height:1px;background:var(--bord);margin:12px 0}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:calc(16px + var(--safe-bottom));left:50%;transform:translateX(-50%);padding:9px 18px;border-radius:var(--rs);font-size:12px;font-weight:600;z-index:9999;display:none;border:1px solid;white-space:nowrap;max-width:90vw;text-align:center}
+@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── SETUP GUIDE ── */
+.step{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--bord)}
+.step:last-child{border-bottom:none}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--gr-a);color:var(--gr);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body{flex:1;font-size:12px;color:var(--mu);line-height:1.7}
+.step-body strong{color:var(--tx)}
+.step-body code{background:var(--bg3);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;color:var(--ye);display:inline-block;margin:1px 0}
+.copy-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:5px;border:1px solid var(--bord);background:var(--bg3);color:var(--bl);cursor:pointer;font-family:inherit;margin-top:4px}
+.copy-btn:active{background:var(--bl-a)}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bord2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="top">
+  <div class="logo">💰 MisFinanzas</div>
+  <div class="tabs">
+    <button class="tb on" onclick="show('gastos',this)">Gastos</button>
+    <button class="tb" onclick="show('cobros',this)">Cobros</button>
+    <button class="tb" onclick="show('ingresos',this)">Ingresos</button>
+    <button class="tb" onclick="show('balance',this)">Balance</button>
+    <button class="tb" onclick="show('tarjetas',this)">Tarjetas</button>
+    <button class="tb" onclick="show('mama',this)">Mamá</button>
+    <button class="tb" onclick="show('cfg',this)">⚙</button>
+  </div>
+  <div class="sdot err" id="sdot" title="Estado conexión"></div>
+</div>
+
+<!-- SCROLLABLE CONTENT -->
+<div class="content">
+<div class="wrap">
+
+<!-- ══════ GASTOS ══════ -->
+<div id="s-gastos" class="sec on">
+  <div class="stit">💸 Registrar Gasto</div>
+  <div class="card">
+    <div class="g2">
+      <div class="fg"><label>Fecha</label><input type="date" id="g-fecha"></div>
+      <div class="fg"><label>Hora</label><input type="time" id="g-hora"></div>
+    </div>
+    <div class="fg"><label>Descripción</label>
+      <input type="text" id="g-desc" placeholder="Farmacia, ropa Saga, almuerzo, recibo luz...">
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Monto (S/)</label>
+        <input type="number" id="g-monto" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+      </div>
+      <div class="fg"><label>¿Quién generó el gasto?</label>
+        <select id="g-quien" onchange="chkQuien()">
+          <option value="yo">Yo</option>
+          <option value="mama">Mamá</option>
+          <option value="anny">Anny</option>
+          <option value="hnaanny">Hermana de Anny</option>
+          <option value="carlos">Carlos</option>
+          <option value="otro">Otra persona</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" id="g-custom-box" style="display:none">
+      <label>Nombre de la persona</label>
+      <input type="text" id="g-custom" placeholder="Nombre completo">
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Pagado con</label>
+        <select id="g-pago" onchange="chkPago()">
+          <option value="efectivo">Efectivo</option>
+          <option value="yape">Yape</option>
+          <option value="oh">Tarjeta Oh</option>
+          <option value="interbank">Tarjeta Interbank</option>
+          <option value="saga">Tarjeta Saga Falabella</option>
+          <option value="bbva">Tarjeta BBVA</option>
+        </select>
+      </div>
+      <div class="fg"><label>Mes de facturación</label><select id="g-mesf"></select></div>
+    </div>
+    <div id="g-tar-info" class="al bl" style="display:none"></div>
+
+    <!-- COBRO -->
+    <div class="csm" style="margin-bottom:10px">
+      <div class="tgh" onclick="tog('tgd','tgda')">
+        <span style="font-size:12px;font-weight:700;color:var(--ye)">💰 ¿Esta persona me va a pagar?</span>
+        <span class="tga" id="tgda">▼</span>
+      </div>
+      <div class="tgb" id="tgd">
+        <div class="g2" style="margin-top:10px">
+          <div class="fg" style="margin:0"><label>¿Me pagan?</label>
+            <select id="g-dt">
+              <option value="no">No — lo asumo yo</option>
+              <option value="todo">Sí, todo</option>
+              <option value="parcial">Solo una parte</option>
+            </select>
+          </div>
+          <div class="fg" style="margin:0"><label>Monto que me deben (S/)</label>
+            <input type="number" id="g-dm" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+          </div>
+        </div>
+        <div class="fg" style="margin-top:8px;margin-bottom:0">
+          <label>Fecha límite para que me paguen</label>
+          <input type="date" id="g-df">
+          <div style="font-size:10px;color:var(--mu);margin-top:3px" id="g-df-hint">Se calcula según la tarjeta usada.</div>
+        </div>
+        <div class="fg" style="margin-top:8px;margin-bottom:0">
+          <label>¿Cómo me va a pagar?</label>
+          <select id="g-dforma">
+            <option value="yape">Yape</option>
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="cualquiera">Cualquier forma</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAMA -->
+    <div class="csm" style="margin-bottom:10px">
+      <div class="tgh" onclick="tog('tgm','tgma')">
+        <span style="font-size:12px;font-weight:700;color:var(--pk)">💗 ¿Mamá dio dinero para este gasto?</span>
+        <span class="tga" id="tgma">▼</span>
+      </div>
+      <div class="tgb" id="tgm">
+        <div class="g2" style="margin-top:10px">
+          <div class="fg" style="margin:0"><label>Cómo dio el dinero</label>
+            <select id="g-mf"><option value="">No aplica</option><option value="efectivo">Efectivo</option><option value="yape">Yape</option></select>
+          </div>
+          <div class="fg" style="margin:0"><label>Monto que dio (S/)</label>
+            <input type="number" id="g-mm" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+          </div>
+        </div>
+        <div class="fg" style="margin-top:8px;margin-bottom:0"><label>¿Cómo usé ese dinero?</label>
+          <select id="g-mu">
+            <option value="pago-directo">Pagué el gasto de mamá directo</option>
+            <option value="pago-parcial">Pago parcial (el resto lo puse yo)</option>
+            <option value="pago-tarjeta">Lo usé para pagar mi tarjeta</option>
+            <option value="yape-propios">Yapié para mis gastos propios</option>
+            <option value="guarde">Lo guardé / ahorré</option>
+          </select>
+        </div>
+        <div class="fg" style="margin-top:8px;margin-bottom:0"><label>Notas</label>
+          <input type="text" id="g-mn" placeholder="Ej: Mamá yapió S/200, usé S/50 para almuerzo">
+        </div>
+      </div>
+    </div>
+
+    <div class="fg"><label>Notas / Evidencia escrita</label>
+      <textarea id="g-det" placeholder="Lugar, motivo, número de operación, quién pidió el favor..."></textarea>
+    </div>
+    <div class="fg"><label>Foto de evidencia (boleta, captura Yape)</label>
+      <input type="file" id="g-foto" accept="image/*" capture="environment" onchange="prevI('g-foto','g-fpv')">
+      <img id="g-fpv" class="ipv">
+    </div>
+    <button class="btn gr full" id="g-btn" onclick="saveGasto()">+ Registrar Gasto</button>
+  </div>
+
+  <div class="mnav">
+    <label style="color:var(--mu);font-size:10px;white-space:nowrap">MES:</label>
+    <select id="fmg" onchange="renderGastos()"></select>
+    <select id="fqg" onchange="renderGastos()">
+      <option value="">Todos</option><option value="yo">Yo</option>
+      <option value="mama">Mamá</option><option value="anny">Anny</option>
+      <option value="hnaanny">Hna. Anny</option><option value="carlos">Carlos</option>
+      <option value="otro">Otro</option>
+    </select>
+  </div>
+  <div class="g4" style="margin-bottom:11px">
+    <div class="mc"><div class="ml">Total mes</div><div class="mv re" id="g-t">S/ 0</div></div>
+    <div class="mc"><div class="ml">Tarjetas</div><div class="mv bl" id="g-tc">S/ 0</div></div>
+    <div class="mc"><div class="ml">Efect./Yape</div><div class="mv" id="g-te" style="color:var(--mu)">S/ 0</div></div>
+    <div class="mc"><div class="ml">Por cobrar</div><div class="mv ye" id="g-cob">S/ 0</div></div>
+  </div>
+  <div class="card"><div class="ch">Gastos registrados</div><div id="lista-g"><div class="loading-row">Conectando...</div></div></div>
+</div>
+
+<!-- ══════ COBROS ══════ -->
+<div id="s-cobros" class="sec">
+  <div class="stit">📋 Cobros — Lo que me deben</div>
+  <div class="al bl">Gastos que pagaste tú pero que otros te deben devolver. La fecha límite se calcula automáticamente según la tarjeta para no generar intereses.</div>
+  <div class="mnav">
+    <label style="color:var(--mu);font-size:10px;white-space:nowrap">MES:</label>
+    <select id="fmd" onchange="renderCobros()"></select>
+    <select id="fsd" onchange="renderCobros()">
+      <option value="">Todos</option>
+      <option value="pendiente">Pendientes</option>
+      <option value="parcial">Parciales</option>
+      <option value="pagado">Pagados</option>
+    </select>
+  </div>
+  <div class="g3" style="margin-bottom:11px">
+    <div class="mc"><div class="ml">Total a cobrar</div><div class="mv re" id="d-tot">S/ 0</div></div>
+    <div class="mc"><div class="ml">Ya cobrado</div><div class="mv gr" id="d-cob">S/ 0</div></div>
+    <div class="mc"><div class="ml">Pendiente</div><div class="mv ye" id="d-pen">S/ 0</div></div>
+  </div>
+
+  <!-- Registrar pago recibido -->
+  <div class="card">
+    <div class="tgh" onclick="tog('tgpr','tgpra')">
+      <div class="ch" style="margin:0;cursor:pointer">+ Registrar pago recibido</div>
+      <span class="tga" id="tgpra">▼</span>
+    </div>
+    <div class="tgb" id="tgpr">
+      <div style="margin-top:12px">
+        <div class="g2">
+          <div class="fg"><label>Persona que pagó</label>
+            <select id="pr-q">
+              <option value="mama">Mamá</option><option value="anny">Anny</option>
+              <option value="hnaanny">Hna. de Anny</option><option value="carlos">Carlos</option>
+              <option value="otro">Otra persona</option>
+            </select>
+          </div>
+          <div class="fg"><label>Monto pagado (S/)</label>
+            <input type="number" id="pr-m" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+          </div>
+        </div>
+        <div class="g2">
+          <div class="fg"><label>Fecha del pago</label><input type="date" id="pr-f"></div>
+          <div class="fg"><label>¿Cómo pagó?</label>
+            <select id="pr-forma">
+              <option value="yape">Yape</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="transferencia">Transferencia</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg"><label>Aplicar a gasto específico</label>
+          <select id="pr-gid"><option value="auto">Automático — gasto más antiguo primero</option></select>
+        </div>
+        <div class="fg"><label>Notas</label>
+          <input type="text" id="pr-n" placeholder="Ej: Anny yapió S/80 de la Saga del lunes">
+        </div>
+        <div class="fg"><label>Foto del comprobante (Yape / transferencia)</label>
+          <input type="file" id="pr-foto" accept="image/*" onchange="prevI('pr-foto','pr-fpv')">
+          <img id="pr-fpv" class="ipv">
+        </div>
+        <button class="btn gr full" onclick="regPago()">✓ Registrar pago recibido</button>
+      </div>
+    </div>
+  </div>
+  <div id="cobros-cont"></div>
+</div>
+
+<!-- ══════ INGRESOS ══════ -->
+<div id="s-ingresos" class="sec">
+  <div class="stit">💵 Ingresos</div>
+  <div class="card">
+    <div class="g2">
+      <div class="fg"><label>Fecha</label><input type="date" id="i-f"></div>
+      <div class="fg"><label>Mes que corresponde</label><select id="i-mes"></select></div>
+    </div>
+    <div class="fg"><label>Descripción</label>
+      <input type="text" id="i-desc" placeholder="Sueldo, liquidación, bono, extra, cobro...">
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Monto (S/)</label>
+        <input type="number" id="i-m" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+      </div>
+      <div class="fg"><label>Tipo</label>
+        <select id="i-tipo">
+          <option value="sueldo">Sueldo</option>
+          <option value="extra">Ingreso extra</option>
+          <option value="liquidacion">Liquidación</option>
+          <option value="cobro">Cobro de deuda</option>
+          <option value="prestamo">Préstamo recibido</option>
+          <option value="devolucion">Devolución</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Notas</label><textarea id="i-n" placeholder="Detalles adicionales..."></textarea></div>
+    <div class="fg"><label>Foto comprobante</label>
+      <input type="file" id="i-foto" accept="image/*" onchange="prevI('i-foto','i-fpv')">
+      <img id="i-fpv" class="ipv">
+    </div>
+    <button class="btn gr full" onclick="saveIngreso()">+ Registrar Ingreso</button>
+  </div>
+  <div class="mnav"><label style="color:var(--mu);font-size:10px;white-space:nowrap">MES:</label>
+    <select id="fmi" onchange="renderIngresos()"></select>
+  </div>
+  <div class="g3" style="margin-bottom:11px">
+    <div class="mc"><div class="ml">Total ingresos</div><div class="mv gr" id="it-tot">S/ 0</div></div>
+    <div class="mc"><div class="ml">Sueldo</div><div class="mv bl" id="it-su">S/ 0</div></div>
+    <div class="mc"><div class="ml">Extras</div><div class="mv ye" id="it-ex">S/ 0</div></div>
+  </div>
+  <div class="card"><div class="ch">Ingresos registrados</div><div id="lista-i"><div class="loading-row">Cargando...</div></div></div>
+</div>
+
+<!-- ══════ BALANCE ══════ -->
+<div id="s-balance" class="sec">
+  <div class="stit">📊 Balance Mensual</div>
+  <div class="mnav"><label style="color:var(--mu);font-size:10px;white-space:nowrap">MES:</label>
+    <select id="fmb" onchange="renderBalance()"></select>
+  </div>
+  <div class="g2" style="margin-bottom:10px">
+    <div class="mc"><div class="ml">Total ingresos</div><div class="mv gr" id="b-ing">S/ 0</div></div>
+    <div class="mc"><div class="ml">Total gastos</div><div class="mv re" id="b-gas">S/ 0</div></div>
+  </div>
+  <div class="mc" style="margin-bottom:10px">
+    <div class="ml">Saldo disponible</div>
+    <div class="mv" id="b-sal" style="font-size:22px">S/ 0</div>
+    <div class="pb" style="margin-top:8px"><div class="pf" id="b-pb" style="width:0%"></div></div>
+    <div style="font-size:10px;color:var(--mu);margin-top:4px" id="b-pct"></div>
+  </div>
+  <div class="card"><div class="ch">Distribución recomendada (50/20/10)</div><div id="b-dist"></div></div>
+  <div class="card"><div class="ch">Gastos por persona</div><div id="b-pers"></div></div>
+  <div class="card"><div class="ch">Por medio de pago</div><div id="b-med"></div></div>
+  <div class="card"><div class="ch">Histórico últimos 6 meses</div>
+    <div id="b-chart" style="display:flex;align-items:flex-end;gap:5px;height:68px;margin-top:6px"></div>
+  </div>
+</div>
+
+<!-- ══════ TARJETAS ══════ -->
+<div id="s-tarjetas" class="sec">
+  <div class="stit">💳 Control de Tarjetas</div>
+  <div class="mnav"><label style="color:var(--mu);font-size:10px;white-space:nowrap">MES:</label>
+    <select id="fmt" onchange="renderTarjetas()"></select>
+  </div>
+  <div id="tar-cards"></div>
+  <div class="card">
+    <div class="ch">Reglas de pago sin intereses</div>
+    <div style="display:grid;gap:7px">
+      <div class="csm" style="border-left:3px solid var(--oh)"><b style="color:var(--oh)">Oh</b> — Pago normal día <b>9</b> · Con deuda del mes anterior: antes del <b style="color:var(--re)">día 3</b></div>
+      <div class="csm" style="border-left:3px solid var(--ib)"><b style="color:var(--ib)">Interbank</b> — Pago normal día <b>19</b> · Con deuda del mes anterior: antes del <b style="color:var(--re)">día 15</b></div>
+      <div class="csm" style="border-left:3px solid var(--sg)"><b style="color:var(--sg)">Saga Falabella</b> — Pago normal día <b>9</b> · Con deuda del mes anterior: antes del <b style="color:var(--re)">día 1</b></div>
+      <div class="csm" style="border-left:3px solid var(--bv)"><b style="color:var(--bv)">BBVA</b> — Pago normal día <b>9</b> · Con deuda del mes anterior: antes del <b style="color:var(--re)">día 5</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ MAMÁ ══════ -->
+<div id="s-mama" class="sec">
+  <div class="stit">💗 Flujo de Dinero — Mamá</div>
+  <div class="mnav"><label style="color:var(--mu);font-size:10px;white-space:nowrap">MES:</label>
+    <select id="fmm" onchange="renderMama()"></select>
+  </div>
+  <div class="g3" style="margin-bottom:11px">
+    <div class="mc"><div class="ml">Recibido de mamá</div><div class="mv ye" id="m-r">S/ 0</div></div>
+    <div class="mc"><div class="ml">Usado en gastos mamá</div><div class="mv pk" id="m-m">S/ 0</div></div>
+    <div class="mc"><div class="ml">Usado en mis cosas</div><div class="mv re" id="m-y">S/ 0</div></div>
+  </div>
+  <div class="card"><div class="ch">Detalle de movimientos</div><div id="lista-m"><div class="loading-row">Cargando...</div></div></div>
+</div>
+
+<!-- ══════ CONFIG ══════ -->
+<div id="s-cfg" class="sec">
+  <div class="stit">⚙ Configuración</div>
+
+  <!-- ESTADO CONEXIÓN -->
+  <div class="card">
+    <div class="ch">Estado de conexión</div>
+    <div id="cfg-status-box"></div>
+  </div>
+
+  <!-- GUÍA SETUP FIREBASE -->
+  <div class="card" id="cfg-guide" style="display:none">
+    <div class="ch" style="color:var(--ye)">Conectar base de datos (solo una vez)</div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:12px">Sigue estos pasos para que tus datos se guarden en la nube y puedas verlos en cualquier dispositivo.</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">Ve a <strong>console.firebase.google.com</strong> e inicia sesión con tu cuenta de Google.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">Clic en <strong>"Agregar proyecto"</strong> → escribe un nombre (ej: <code>misfinanzas</code>) → desactiva Analytics → <strong>"Crear proyecto"</strong>.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">En el panel del proyecto, clic en el ícono <strong>&lt;/&gt; (Web)</strong> → nombre de la app: <code>web</code> → <strong>"Registrar app"</strong> → copia el objeto <code>firebaseConfig</code> que aparece.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">En el menú izquierdo: <strong>Compilación → Firestore Database → Crear base de datos → Modo producción → Elegir región: us-east1 → Listo</strong>.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">En Firestore, clic en <strong>"Reglas"</strong> y reemplaza todo con este texto:<br>
+        <code>rules_version = '2'; service cloud.firestore { match /databases/{database}/documents { match /{document=**} { allow read, write: if true; } } }</code><br>
+        <button class="copy-btn" onclick="copyText(`rules_version = '2'; service cloud.firestore { match /databases/{database}/documents { match /{document=**} { allow read, write: if true; } } }`)">📋 Copiar reglas</button>
+        <br>Clic en <strong>"Publicar"</strong>.
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">Abre el archivo <strong>firebase-config.js</strong> con el Bloc de notas y pega ahí los valores que copiaste en el paso 3. Guarda el archivo y recarga esta página.</div>
+    </div>
+    <div class="al ye" style="margin-top:8px">Mientras tanto, todos tus datos se guardan localmente en este dispositivo. Al conectar Firebase, se migrarán automáticamente a la nube.</div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="card">
+    <div class="ch">Resumen de datos</div>
+    <div class="g3">
+      <div class="mc"><div class="ml">Gastos</div><div class="mv bl" id="cfg-ng">0</div></div>
+      <div class="mc"><div class="ml">Ingresos</div><div class="mv gr" id="cfg-ni">0</div></div>
+      <div class="mc"><div class="ml">Fuente</div><div class="mv" id="cfg-src" style="font-size:11px;color:var(--mu)">local</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--mu);margin-top:10px" id="cfg-meses"></div>
+  </div>
+
+  <!-- EDITAR REGISTROS -->
+  <div class="card">
+    <div class="ch">✏ Editar o eliminar registros</div>
+    <div class="mnav">
+      <label style="color:var(--mu);font-size:10px;white-space:nowrap">MES:</label>
+      <select id="cfg-mes" onchange="renderCfgLista()"></select>
+      <select id="cfg-tipo" onchange="renderCfgLista()">
+        <option value="gastos">Gastos</option>
+        <option value="ingresos">Ingresos</option>
+      </select>
+    </div>
+    <div id="cfg-lista"><div class="loading-row">Selecciona un mes</div></div>
+  </div>
+
+  <!-- BACKUP -->
+  <div class="card">
+    <div class="ch">💾 Backup y exportación</div>
+    <div style="display:grid;gap:9px">
+      <div class="csm">
+        <div style="font-weight:700;font-size:12px;color:var(--gr);margin-bottom:6px">Exportar backup</div>
+        <div style="font-size:11px;color:var(--mu);margin-bottom:9px">Guarda tus datos como archivo. Úsalo como respaldo extra o para migrar a otro dispositivo.</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn gr sm" onclick="exportJSON()">⬇ Backup .json</button>
+          <button class="btn bl sm" onclick="exportCSV()">📊 Excel .csv</button>
+        </div>
+      </div>
+      <div class="csm">
+        <div style="font-weight:700;font-size:12px;color:var(--ye);margin-bottom:6px">Restaurar desde backup</div>
+        <div style="font-size:11px;color:var(--mu);margin-bottom:8px"><b style="color:var(--re)">Reemplaza todos los datos actuales.</b> Asegúrate de tener el backup correcto.</div>
+        <input type="file" id="cfg-import" accept=".json" onchange="importJSON(this)">
+      </div>
+    </div>
+  </div>
+
+  <!-- PELIGRO -->
+  <div class="card" style="border-color:var(--re-b)">
+    <div class="ch" style="color:var(--re)">⚠ Zona peligrosa</div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:10px">Borra absolutamente todos tus datos. No se puede deshacer.</div>
+    <button class="btn re" onclick="borrarTodo()">🗑 Borrar todos los datos</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+</div><!-- /content -->
+
+<!-- MODALS -->
+<div class="pmfull" id="pm" onclick="this.style.display='none'"><img id="pm-img" src=""></div>
+
+<div class="modal-bg" id="edit-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="edit-title">Editar</div>
+      <button class="ico" onclick="closeEdit()" style="font-size:20px">✕</button>
+    </div>
+    <div id="edit-body"></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn gr full" onclick="saveEdit()">💾 Guardar cambios</button>
+      <button class="btn" onclick="closeEdit()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase + App Logic -->
+<script type="module" src="app.js"></script>
+</body>
+</html>
