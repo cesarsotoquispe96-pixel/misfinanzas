@@ -148,6 +148,7 @@ input[type=file]{padding:6px;font-size:12px;border-style:dashed;cursor:pointer}
     <button class="tb"     id="btn-mama"     >Mam&#xE1;</button>
     <button class="tb"     id="btn-cfg"      >&#x2699;</button>
   </div>
+  <div id="sdot" style="width:9px;height:9px;border-radius:50%;background:var(--re);flex-shrink:0;transition:background .4s" title="Solo local"></div>
 </div>
 
 <div class="content" id="content">
@@ -535,6 +536,23 @@ input[type=file]{padding:6px;font-size:12px;border-style:dashed;cursor:pointer}
 // ================================================================
 var APP = (function() {
 
+// ═══════════════════════════════════════════════════════
+//  CONFIGURACIÓN FIREBASE — edita estos valores
+//  Déjalos como están si no tienes Firebase (funciona local)
+// ═══════════════════════════════════════════════════════
+var FB_CONFIG = {
+  apiKey: "AIzaSyDgEinkvU6uMtxRDdu-rUIKPjzVgVRIS7M",
+  authDomain: "misfinanzas-568f6.firebaseapp.com",
+  projectId: "misfinanzas-568f6",
+  storageBucket: "misfinanzas-568f6.firebasestorage.app",
+  messagingSenderId: "248990760495",
+  appId: "1:248990760495:web:d46fef0003b996cf0050da"
+};
+// Tu nombre de usuario — cámbialo (sin espacios ni tildes)
+var FB_USER = "usuario1";
+var FB_READY = false;
+var FB_DB = null;
+
 var SUELDO = 1130;
 var LK = 'mf_v8';
 
@@ -551,7 +569,7 @@ var PGNM = {oh:'Oh',interbank:'Interbank',saga:'Saga',bbva:'BBVA',efectivo:'Efec
 var PGBG = {oh:'boh',interbank:'bib',saga:'bsg',bbva:'bbv',efectivo:'bef',yape:'byp',transferencia:'btr'};
 var USOLBL = {'pago-directo':'Pagué gasto mamá','pago-parcial':'Pago parcial','pago-tarjeta':'Para mi tarjeta','yape-propios':'Yapié propios','guarde':'Guardé'};
 
-// ── DB ──────────────────────────────────────────
+// ── DB (localStorage + Firebase sincronizados) ──
 function gdb(){
   try{var r=localStorage.getItem(LK);return r?JSON.parse(r):{gastos:[],ingresos:[]};}
   catch(e){return{gastos:[],ingresos:[]};}
@@ -559,6 +577,16 @@ function gdb(){
 function sdb(d){
   try{localStorage.setItem(LK,JSON.stringify(d));}
   catch(e){alert('Sin espacio para guardar. Exporta un backup.');}
+  // Sincronizar con Firebase si está conectado
+  if(FB_READY&&FB_DB){
+    try{
+      window._fbSet(d);
+    }catch(e){console.warn('Firebase write error:',e);}
+  }
+}
+function setSdot(ok){
+  var el=document.getElementById('sdot');
+  if(el){el.style.background=ok?'var(--gr)':'var(--re)';el.title=ok?'Conectado a la nube':'Solo local';}
 }
 
 // ── UTILS ───────────────────────────────────────
@@ -1231,7 +1259,56 @@ function init(){
   document.getElementById('g-quien').addEventListener('change',chkQuien);
   document.getElementById('g-pago').addEventListener('change',chkPago);
   document.getElementById('g-mesf').addEventListener('change',chkPago);
+  // Iniciar Firebase si está configurado
+  initFirebase();
   renderGastos();
+}
+
+function initFirebase(){
+  if(!FB_CONFIG.apiKey||!FB_CONFIG.projectId){setSdot(false);return;}
+  try{
+    // Cargar Firebase dinámicamente
+    var script1=document.createElement('script');
+    script1.src='https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+    script1.onload=function(){
+      var script2=document.createElement('script');
+      script2.src='https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js';
+      script2.onload=function(){
+        try{
+          var app=firebase.initializeApp(FB_CONFIG);
+          FB_DB=firebase.firestore(app);
+          // Leer datos de la nube al iniciar
+          FB_DB.collection('usuarios').doc(FB_USER).get().then(function(doc){
+            if(doc.exists){
+              var data=doc.data();
+              if(data&&data.gastos){
+                // Fusionar: la nube gana si tiene datos más recientes
+                localStorage.setItem(LK,JSON.stringify({gastos:data.gastos||[],ingresos:data.ingresos||[]}));
+                renderGastos();renderCobros();renderIngresos();renderBalance();renderTarjetas();
+              }
+            }
+            FB_READY=true;setSdot(true);
+            // Escuchar cambios en tiempo real
+            FB_DB.collection('usuarios').doc(FB_USER).onSnapshot(function(doc){
+              if(doc.exists&&FB_READY){
+                var data=doc.data();
+                if(data&&data.gastos){
+                  localStorage.setItem(LK,JSON.stringify({gastos:data.gastos||[],ingresos:data.ingresos||[]}));
+                  renderGastos();renderCobros();renderBalance();renderTarjetas();
+                }
+              }
+            });
+          }).catch(function(e){console.warn('FB read error:',e);setSdot(false);});
+          // Helper para escribir
+          window._fbSet=function(d){
+            FB_DB.collection('usuarios').doc(FB_USER).set({gastos:d.gastos,ingresos:d.ingresos,updated:new Date().toISOString()});
+          };
+        }catch(e){console.warn('Firebase init error:',e);setSdot(false);}
+      };
+      document.head.appendChild(script2);
+    };
+    document.head.appendChild(script1);
+  }catch(e){setSdot(false);}
 }
 
 return{
